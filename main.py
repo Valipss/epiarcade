@@ -1,22 +1,32 @@
-# Import standard modules.
+# Import standard modules
 import sys
+import os
 from enum import Enum
+from typing import Any
  
-# Import non-standard modules.
+# Import non-standard modules
 import pygame
 from pygame.locals import *
 import pygame_menu # https://pygame-menu.readthedocs.io/en/4.2.4/index.html
 
+folder = './games'
+foldersName = [name for name in os.listdir(folder) if os.path.isdir(os.path.join(folder, name))]
 
+# Constants and global variables
 class View(Enum):
   LOGIN_MENU = 1
   GAMES_LIST_MENU = 2
   IN_GAME_MENU = 3
-  
+
+
+class Game():
+  def __init__(self, name):
+    self.name = name
 
 class Launcher:
   def __init__(self):
     self.view = View.LOGIN_MENU
+    self.selectedGame = None
 
   def __handleKeydown(self, event):
     if event.unicode == 'n':
@@ -49,7 +59,12 @@ class Launcher:
       self.gamesListMenu.draw(screen)
 
     pygame.display.flip()
-  
+
+  def launchGame(self, selected: Any, value: int):
+    # print(value)
+    self.selectedGame = value
+    print(self.selectedGame)
+
   def __initComponents(self):
     self.loginMenu = pygame_menu.Menu(
       title = "Login",
@@ -61,7 +76,7 @@ class Launcher:
       "Pull your student card out of your wallet\n"\
       "Place the card in front of the reader\n"\
       "Enjoy !\n"
-    self.loginMenu.add.label(loginMenuContent, max_char=-1, font_size=24)
+    self.loginMenu.add.label(loginMenuContent, max_char = -1, font_size = 24)
 
     self.gamesListMenu = pygame_menu.Menu(
       title = "Games List",
@@ -69,7 +84,12 @@ class Launcher:
       height = 720,
       theme = pygame_menu.themes.THEME_DARK
     )
-    self.gamesListMenu.add.selector("Select ", ["test"])
+    self.gamesListMenu.add.selector(
+      title = 'Choose game ',
+      items = list(zip(foldersName, foldersName)),
+      default = 0,
+      onreturn = self.launchGame,
+    )
 
   def runPyGame(self):
     pygame.init()
