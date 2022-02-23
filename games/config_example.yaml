@@ -3,3 +3,4 @@ LANGUAGE: "" # C, C++, python, C# ...
 DEPENDENCIES_SCRIPT: [] # Script to install any particular
 INPUTS: [] # Remapping joysticks and button inputs.
 VERSION: "" # Version of your game
+GAMEMODES: [] # ["solo"] or ["duo"] or ["solo", "duo"]

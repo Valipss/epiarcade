@@ -1,5 +1,7 @@
 import sys
 import os
+import subprocess
+from threading import Thread
 from enum import Enum
 from typing import Any
 
@@ -13,8 +15,14 @@ import pygame_menu # https://pygame-menu.readthedocs.io/en/4.2.4/index.html
 
 class View(Enum):
   LOGIN_MENU = 1
-  GAMES_LIST_MENU = 2
-  IN_GAME_MENU = 3
+  SOLO_GAMES_LIST_MENU = 2
+  DUO_GAMES_LIST_MENU = 3
+  IN_GAME_MENU = 4
+
+class User():
+  def __init__(self, login):
+    self.login = login
+
 
 class Game():
   def __init__(self, name, config):
@@ -24,16 +32,30 @@ class Game():
     self.dependencies_script = config['DEPENDENCIES_SCRIPT']
     self.inputs = config['INPUTS']
     self.version = config['VERSION']
+    self.modes = config['GAMEMODES']
+  
+  def launch(self, mode, users, launcher):
+    u = [user.login for user in users]
+    process = subprocess.run(
+      args=[mode, ''.join(u)],
+      executable="games/" + self.name + "/" + self.executablePath,
+      capture_output=True
+    )
+    if process.returncode == 42:
+      launcher.view = View.LOGIN_MENU
 
 class Launcher:
   def __init__(self):
     self.view = View.LOGIN_MENU
+    self.connectedUsers = [User("hubert.bonisseur-de-la-bath@epitech.eu")] # TODO set as None for deployment
     self.selectedGame = None
     self.availableGames = dict()
 
   def __handleKeydown(self, event):
-    if event.unicode == 'n':
-      self.view = View.GAMES_LIST_MENU
+    if event.unicode == 's':
+      self.view = View.SOLO_GAMES_LIST_MENU
+    elif event.unicode == 'd':
+      self.view = View.DUO_GAMES_LIST_MENU
 
   def __update(self, dt):
     events = pygame.event.get()
@@ -41,8 +63,10 @@ class Launcher:
     currentView = self.view
     if self.view == View.LOGIN_MENU:
       self.loginMenu.update(events)
-    elif self.view == View.GAMES_LIST_MENU:
-      self.gamesListMenu.update(events)
+    elif self.view == View.SOLO_GAMES_LIST_MENU:
+      self.soloGamesListMenu.update(events)
+    elif self.view == View.DUO_GAMES_LIST_MENU:
+      self.duoGamesListMenu.update(events)
 
     for event in events:
       if event.type == pygame.KEYDOWN:
@@ -58,15 +82,31 @@ class Launcher:
     currentView = self.view
     if self.view == View.LOGIN_MENU:
       self.loginMenu.draw(screen)
-    elif self.view == View.GAMES_LIST_MENU:
-      self.gamesListMenu.draw(screen)
+    elif self.view == View.SOLO_GAMES_LIST_MENU:
+      self.soloGamesListMenu.draw(screen)
+    elif self.view == View.DUO_GAMES_LIST_MENU:
+      self.duoGamesListMenu.draw(screen)
 
     pygame.display.flip()
 
-  def launchGame(self, selected: Any, value: int):
-    # print(value)
-    self.selectedGame = value
-    print(self.selectedGame)
+  def __launchSoloGame(self, selected: Any, value: int):
+    self.selectedGame = self.availableGames[value]
+    self.view = View.IN_GAME_MENU
+    t = Thread(target=self.selectedGame.launch, args=("solo", self.connectedUsers, self))
+    t.start()
+
+  def __launchDuoGame(self, selected: Any, value: int):
+    self.selectedGame = self.availableGames[value]
+    self.view = View.IN_GAME_MENU
+    t = Thread(target=self.selectedGame.launch, args=("duo", self.connectedUsers, self))
+    t.start()
+
+  def __getAvailablesGames(self, mode):
+    ret = dict()
+    for game in self.availableGames.values():
+      if mode in game.modes:
+        ret[game.name] = self.availableGames[game.name]
+    return list(zip(ret.keys(), ret.keys()))
 
   def __initComponents(self):
 # LOGIN MENU
@@ -78,13 +118,35 @@ class Launcher:
     self.loginMenu.add.label(loginMenuContent, max_char = -1, font_size = 24)
 
 # GAMES LIST MENU
-    self.gamesListMenu = pygame_menu.Menu(title = "Games List", width = 1080, height = 720, theme = pygame_menu.themes.THEME_DARK)
-    self.gamesListMenu.add.selector(
-      title = 'Choose game ',
-      items = list(zip(self.availableGames.keys(), self.availableGames.keys())),
-      default = 0,
-      onreturn = self.launchGame,
-    )
+  # SCOREBOARD
+    # self.scoreboardTable = pygame_menu.widgets.Table('scoreboard').configured = True
+    # self.scoreboardTable.add_row(["test", "test"])
+
+  # SOLO
+    self.soloGamesListMenu = pygame_menu.Menu(title = "Games List (SOLO)", width = 1080, height = 720, theme = pygame_menu.themes.THEME_DARK)
+    if len(self.__getAvailablesGames(mode='solo')):
+      self.soloGamesListMenu.add.selector(
+        title = 'Choose a game ',
+        items = self.__getAvailablesGames(mode='solo'),
+        default = 0,
+        # onchange = self.__updateScoreboard(mode='solo'),
+        onreturn = self.__launchSoloGame,
+      )
+    else:
+      self.soloGamesListMenu.add.label("No games found", max_char = -1, font_size = 24)
+
+  # DUO
+    self.duoGamesListMenu = pygame_menu.Menu(title = "Games List (DUO)", width = 1080, height = 720, theme = pygame_menu.themes.THEME_DARK)
+    if len(self.__getAvailablesGames(mode='duo')):
+      self.duoGamesListMenu.add.selector(
+        title = 'Choose a game ',
+        items = self.__getAvailablesGames(mode='duo'),
+        default = 0,
+        onchange = self.__updateScoreboard,
+        onreturn = self.__launchDuoGame,
+      )
+    else:
+      self.duoGamesListMenu.add.label("No games found", max_char = -1, font_size = 24)
 
   def __loadAvailableGames(self):
     mainFolder = './games'
