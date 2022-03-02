@@ -13,6 +13,7 @@ from pygame.locals import *
 # Import class
 from src.misc import Misc
 from src import jadoor
+from src.jadoor.credit import Credit
 
 
 class View(Enum):
@@ -59,6 +60,7 @@ class Launcher:
         self.selectedGame = None
         self.availableGames = dict()
         self.jadoor = jadoor.JaDoor()
+        self.credit = jadoor.credit.Credit()
 
     def __handleKeydown(self, event):
         if event.unicode == 's':
@@ -162,6 +164,8 @@ class Launcher:
       else:
         self.soloGamesListMenu.add.label("No games found", max_char=-1)
         self.soloGamesListMenu.add.label("Student login: None", 'login_message')
+        self.soloGamesListMenu.add.label("Credit state unknown", 'credit_message')
+
 
     # DUO
       self.duoGamesListMenu = pygame_menu.Menu(title = "Games List (DUO)", width = 1600, height = 900, theme = mainTheme)
@@ -216,4 +220,6 @@ class Launcher:
                     self.connectedUsers[0] = User(student_login)
                     self.view = View.SOLO_GAMES_LIST_MENU
                     self.soloGamesListMenu.get_widget('login_message').set_title("Student login: " + student_login)
+                    self.soloGamesListMenu.get_widget('credit_message').set_title("Has a credit ? -> " + str(self.credit.check(student_login)))
+                    self.credit.consume(student_login)  # Remove this to not consume the credit
             dt = fpsClock.tick(fps)
