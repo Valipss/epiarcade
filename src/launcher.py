@@ -39,7 +39,7 @@ class Game():
     self.version = config['VERSION']
     self.modes = config['GAMEMODES']
     self.scoreboards = Misc.read_yaml(file_path="games/" + self.name + "/scoreboard.yaml")
-  
+
   def launch(self, mode, users, launcher):
     u = [user.login for user in users]
     process = subprocess.run(
@@ -87,7 +87,6 @@ class Launcher:
     def __draw(self, screen):
         screen.fill((0, 0, 0))
 
-        self.menuBackground.draw(screen)
         # Redraw screen here.
         currentView = self.view
         if self.view == View.LOGIN_MENU:
@@ -116,9 +115,9 @@ class Launcher:
         for game in self.availableGames.values():
             if mode in game.modes:
                 ret[game.name] = self.availableGames[game.name]
-        return list(zip(ret.keys(), ret.values()))
+        return list(zip(ret.keys(), ret.keys()))
 
-    def __initComponents(self):  
+    def __initComponents(self):
   # SHARED CONTENT
       self.menuBackground = pygame_menu.BaseImage(image_path="medias/arcade_bg.jpg")
       arcadeFont20 = pygame_menu.font.get_font("medias/ArcadeFont.ttf", 20)
@@ -161,7 +160,8 @@ class Launcher:
         self.soloScoreboard.update_cell_style(-1, -1, border_position=pygame_menu.locals.POSITION_NORTH)
         self.soloScoreboard.update_cell_style(-1, 1, font=arcadeFont40, border_width=0)
       else:
-        self.soloGamesListMenu.add.label("No games found", max_char=-1, font=arcadeFont40)
+        self.soloGamesListMenu.add.label("No games found", max_char=-1)
+        self.soloGamesListMenu.add.label("Student login: None", 'login_message')
 
     # DUO
       self.duoGamesListMenu = pygame_menu.Menu(title = "Games List (DUO)", width = 1600, height = 900, theme = mainTheme)
@@ -215,4 +215,5 @@ class Launcher:
                 if student_login:
                     self.connectedUsers[0] = User(student_login)
                     self.view = View.SOLO_GAMES_LIST_MENU
+                    self.soloGamesListMenu.get_widget('login_message').set_title("Student login: " + student_login)
             dt = fpsClock.tick(fps)

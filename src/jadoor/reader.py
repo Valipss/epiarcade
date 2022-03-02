@@ -16,7 +16,7 @@ nb : Number of times to blink/beep
 def beep(clf, nb):
     i = 0
     while i < nb:
-        # self.clf.device.turn_on_led_and_buzzer()
+        #clf.device.turn_on_led_and_buzzer()
         time.sleep(0.05)
         clf.device.turn_off_led_and_buzzer()
         time.sleep(0.1)
