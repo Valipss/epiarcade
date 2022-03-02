@@ -9,6 +9,7 @@ if check.fetchone() is None:
     cursor.execute("CREATE TABLE IF NOT EXISTS whitelist (id text)")
     cursor.execute("CREATE TABLE IF NOT EXISTS blacklist (id text)")
     cursor.execute("INSERT INTO whitelist VALUES ('04376922A96A80')")
+    cursor.execute("INSERT INTO whitelist VALUES ('0410632AA96A80')")
     db.commit()
     print('Database created.')
 

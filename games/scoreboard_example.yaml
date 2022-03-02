@@ -1,4 +1,11 @@
-SCOREBOARD: # - username: Bobby score: 42
+SOLO: # - username: Bobby score: 42
+  - username: "Bobby"
+    score: 42
+  - username: "Valipss"
+    score: 29
+  - username: "Xx_J34N-B4PT15T3_xX"
+    score: 777
+DUO: # - username: Bobby score: 42
   - username: "Bobby"
     score: 42
   - username: "Valipss"

@@ -4,6 +4,8 @@ PIP = pip3
 DEPENDENCIES =	pygame\
 				pygame-menu\
 				pyyaml\
+				nfcpy\
+				requests\
 
 
 .PHONY = run, install_dependencies
