@@ -101,13 +101,13 @@ class Launcher:
         pygame.display.flip()
 
     def __launchSoloGame(self, selected: Any, value: int):
-        self.selectedGame = self.availableGames[value]
+        self.selectedGame = selected[0][1]
         self.view = View.IN_GAME_MENU
         t = Thread(target=self.selectedGame.launch, args=("solo", self.connectedUsers, self))
         t.start()
 
     def __launchDuoGame(self, selected: Any, value: int):
-        self.selectedGame = self.availableGames[value]
+        self.selectedGame = selected[0][1]
         self.view = View.IN_GAME_MENU
         t = Thread(target=self.selectedGame.launch, args=("duo", self.connectedUsers, self))
         t.start()
@@ -117,7 +117,7 @@ class Launcher:
         for game in self.availableGames.values():
             if mode in game.modes:
                 ret[game.name] = self.availableGames[game.name]
-        return list(zip(ret.keys(), ret.keys()))
+        return list(zip(ret.keys(), ret.values()))
 
     def __initComponents(self):
   # SHARED CONTENT
@@ -182,7 +182,7 @@ class Launcher:
         self.duoScoreboard.translate(0, 40)
         self.duoScoreboard.default_cell_padding = 20
         self.duoScoreboard.add_row(['#RANK', 'Epitech login', 'SCORE'], cell_font=arcadeFont20, cell_font_color='white')
-        scoreboard = duoScoreboard.get_value()[0][1].scoreboards['DUO']
+        scoreboard = duoGameSelector.get_value()[0][1].scoreboards['DUO']
         for i in range(len(scoreboard)):
           topColors = ['gold', 'silver', 'brown4']
           self.duoScoreboard.add_row([f'#{i + 1}', scroreboard[i]['username'], scroreboard[i]['score']], cell_font=arcadeFont20,
