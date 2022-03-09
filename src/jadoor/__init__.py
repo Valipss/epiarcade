@@ -1,5 +1,6 @@
-import nfc
 import time
+
+import nfc
 
 from src.jadoor import login, reader, db
 
@@ -73,10 +74,11 @@ class JaDoor:
     self.clf : NFC backend device
     '''
 
-    def read_tag_loop(self):
-        self.clf.connect(rdwr={
+    def read_tag(self):
+        started = time.time()
+        self.clf.connect(terminate=lambda: time.time() - started > 2, rdwr={
             'on-connect': self.on_tag_connect,
-            'beep-on-connect': False, 'targets': ['106A']
+            'beep-on-connect': False, 'targets': ['106A'],
         })
 
     '''
@@ -86,7 +88,11 @@ class JaDoor:
     '''
 
     def read(self):
-        while self.student_login == None:
-            self.read_tag_loop()
+        if not self.clf:
+            self.clf = nfc.ContactlessFrontend('usb')
+        self.read_tag()
         self.clf.close()
-        return self.student_login
+        self.clf = None
+        student_login = self.student_login
+        self.student_login = None
+        return student_login

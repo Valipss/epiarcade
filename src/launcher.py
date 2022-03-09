@@ -46,7 +46,7 @@ class Game():
         process = subprocess.run(
             args=[mode, ''.join(u)],
             executable="./" + self.executablePath,
-            capture_output=False,
+            capture_output=True,
             cwd="games/" + self.name + "/"
         )
         launcher.view = View.LOGIN_MENU
@@ -102,18 +102,18 @@ class Launcher:
         pygame.display.flip()
 
     def __updateSoloScoreboard(self, selected: Any, value: int):
-      for i in range(len(self.soloScoreboard._rows) - 1, 0, -1):
-          self.soloScoreboard.remove_row(self.soloScoreboard._rows[i])
-      scoreboard = selected[0][1].scoreboards['SOLO']
-      if scoreboard:
-        for i in range(len(scoreboard)):
-          topColors = ['gold', 'silver', 'darkorange3']
-          self.soloScoreboard.add_row([f'#{i + 1}', scoreboard[i]['username'], scoreboard[i]['score']], cell_font=self.arcadeFont20,
-                          cell_font_color=topColors[i] if i < 3 else 'white')
-      else:
-          self.soloScoreboard.add_row(['---', "---", "---"], cell_font=self.arcadeFont20, cell_font_color='white')
-      self.soloScoreboard.update_cell_style(-1, -1, border_position=pygame_menu.locals.POSITION_NORTH)
-      self.soloScoreboard.update_cell_style(-1, 1, font=self.arcadeFont40, border_width=0)
+        for i in range(len(self.soloScoreboard._rows) - 1, 0, -1):
+            self.soloScoreboard.remove_row(self.soloScoreboard._rows[i])
+        scoreboard = selected[0][1].scoreboards['SOLO']
+        if scoreboard:
+            for i in range(len(scoreboard)):
+                topColors = ['gold', 'silver', 'darkorange3']
+                self.soloScoreboard.add_row([f'#{i + 1}', scoreboard[i]['username'], scoreboard[i]['score']], cell_font=self.arcadeFont20,
+                                            cell_font_color=topColors[i] if i < 3 else 'white')
+        else:
+            self.soloScoreboard.add_row(['---', "---", "---"], cell_font=self.arcadeFont20, cell_font_color='white')
+        self.soloScoreboard.update_cell_style(-1, -1, border_position=pygame_menu.locals.POSITION_NORTH)
+        self.soloScoreboard.update_cell_style(-1, 1, font=self.arcadeFont40, border_width=0)
 
     def __launchSoloGame(self, selected: Any, value: int):
         if self.credit.check(self.connectedUsers[0].login) is False:
@@ -170,7 +170,7 @@ class Launcher:
                 title='Choose a game ',
                 items=self.__getAvailablesGames(mode='solo'),
                 default=0,
-                onchange = self.__updateSoloScoreboard,
+                onchange=self.__updateSoloScoreboard,
                 onreturn=self.__launchSoloGame,
             )
 
@@ -180,12 +180,12 @@ class Launcher:
             self.soloScoreboard.add_row(['#RANK', 'Epitech login', "SCORE"], cell_font=self.arcadeFont20, cell_font_color='white')
             scoreboard = soloGameSelector.get_value()[0][1].scoreboards['SOLO']
             if scoreboard:
-              for i in range(len(scoreboard)):
-                  topColors = ['gold', 'slategray3', 'darkorange3']
-                  self.soloScoreboard.add_row([f'#{i + 1}', scoreboard[i]['username'], scoreboard[i]['score']], cell_font=self.arcadeFont20,
-                                              cell_font_color=topColors[i] if i < 3 else 'white')
+                for i in range(len(scoreboard)):
+                    topColors = ['gold', 'slategray3', 'darkorange3']
+                    self.soloScoreboard.add_row([f'#{i + 1}', scoreboard[i]['username'], scoreboard[i]['score']], cell_font=self.arcadeFont20,
+                                                cell_font_color=topColors[i] if i < 3 else 'white')
             else:
-              self.soloScoreboard.add_row(['---', "---", "---"], cell_font=self.arcadeFont20, cell_font_color='white')
+                self.soloScoreboard.add_row(['---', "---", "---"], cell_font=self.arcadeFont20, cell_font_color='white')
             self.soloScoreboard.update_cell_style(-1, -1, border_position=pygame_menu.locals.POSITION_NORTH)
             self.soloScoreboard.update_cell_style(-1, 1, font=self.arcadeFont40, border_width=0)
         else:
@@ -210,12 +210,12 @@ class Launcher:
             self.duoScoreboard.add_row(['#RANK', 'Epitech login', 'SCORE'], cell_font=self.arcadeFont20, cell_font_color='white')
             scoreboard = duoGameSelector.get_value()[0][1].scoreboards['DUO']
             if scoreboard:
-              for i in range(len(scoreboard)):
-                  topColors = ['gold', 'slategray3', 'darkorange3']
-                  self.duoScoreboard.add_row([f'#{i + 1}', scoreboard[i]['username'], scoreboard[i]['score']], cell_font=self.arcadeFont20,
-                                              cell_font_color=topColors[i] if i < 3 else 'white')
+                for i in range(len(scoreboard)):
+                    topColors = ['gold', 'slategray3', 'darkorange3']
+                    self.duoScoreboard.add_row([f'#{i + 1}', scoreboard[i]['username'], scoreboard[i]['score']], cell_font=self.arcadeFont20,
+                                               cell_font_color=topColors[i] if i < 3 else 'white')
             else:
-              self.duoScoreboard.add_row(['---', "---", "---"], cell_font=self.arcadeFont20, cell_font_color='white')
+                self.duoScoreboard.add_row(['---', "---", "---"], cell_font=self.arcadeFont20, cell_font_color='white')
             self.duoScoreboard.update_cell_style(-1, -1, border_position=pygame_menu.locals.POSITION_NORTH)
             self.duoScoreboard.update_cell_style(-1, 1, font=self.arcadeFont40, border_width=0)
         else:
@@ -240,17 +240,19 @@ class Launcher:
 
         # Main game loop.
         dt = 1 / fps
+        student_login = None
         while True:
             self.__update(dt)
             self.__draw(screen)
             if self.view == View.LOGIN_MENU:
-                student_login = self.jadoor.read()
-                if student_login:
+                if student_login is None:
+                    student_login = self.jadoor.read()
+                else:
                     self.connectedUsers[0] = User(student_login)
                     student_login = None
                     self.view = View.SOLO_GAMES_LIST_MENU
-                    self.soloGamesListMenu.get_widget('login_message').set_title("Student login: " + self.connectedUsers[0].login)
-                    self.soloGamesListMenu.get_widget('credit_message').set_title("Has a credit ? -> " + str(self.credit.check(student_login)))
+                    self.soloGamesListMenu.get_widget('login_message').set_title("Login: " + self.connectedUsers[0].login)
+                    self.soloGamesListMenu.get_widget('credit_message').set_title("Credits: " + str(int(self.credit.check(self.connectedUsers[0].login))))
                     self.logout_timer = 1800
                     self.soloGamesListMenu.get_widget('logout_timer').set_title("Logout in " + str(int(self.logout_timer / 60)) + " seconds")
             elif self.view in [View.SOLO_GAMES_LIST_MENU, View.DUO_GAMES_LIST_MENU]:
@@ -258,5 +260,5 @@ class Launcher:
                 self.logout_timer -= 1
                 if self.logout_timer == 0:
                     self.view = View.LOGIN_MENU
-                    self.connectedUsers = []
+                    self.connectedUsers = [None]
             dt = fpsClock.tick(fps)
