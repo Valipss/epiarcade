@@ -101,6 +101,20 @@ class Launcher:
 
         pygame.display.flip()
 
+    def __updateSoloScoreboard(self, selected: Any, value: int):
+      for i in range(len(self.soloScoreboard._rows) - 1, 0, -1):
+          self.soloScoreboard.remove_row(self.soloScoreboard._rows[i])
+      scoreboard = selected[0][1].scoreboards['SOLO']
+      if scoreboard:
+        for i in range(len(scoreboard)):
+          topColors = ['gold', 'silver', 'darkorange3']
+          self.soloScoreboard.add_row([f'#{i + 1}', scoreboard[i]['username'], scoreboard[i]['score']], cell_font=self.arcadeFont20,
+                          cell_font_color=topColors[i] if i < 3 else 'white')
+      else:
+          self.soloScoreboard.add_row(['---', "---", "---"], cell_font=self.arcadeFont20, cell_font_color='white')
+      self.soloScoreboard.update_cell_style(-1, -1, border_position=pygame_menu.locals.POSITION_NORTH)
+      self.soloScoreboard.update_cell_style(-1, 1, font=self.arcadeFont40, border_width=0)
+
     def __launchSoloGame(self, selected: Any, value: int):
         if self.credit.check(self.connectedUsers[0].login) is False:
             return
@@ -130,12 +144,12 @@ class Launcher:
     def __initComponents(self):
         # SHARED CONTENT
         self.menuBackground = pygame_menu.BaseImage(image_path="medias/arcade_bg.jpg")
-        arcadeFont20 = pygame_menu.font.get_font("medias/ArcadeFont.ttf", 20)
-        arcadeFont40 = pygame_menu.font.get_font("medias/ArcadeFont.ttf", 40)
+        self.arcadeFont20 = pygame_menu.font.get_font("medias/ArcadeFont.ttf", 20)
+        self.arcadeFont40 = pygame_menu.font.get_font("medias/ArcadeFont.ttf", 40)
         mainTheme = pygame_menu.themes.THEME_DARK.copy()
         mainTheme.set_background_color_opacity(0.6)
-        mainTheme.title_font = arcadeFont40
-        mainTheme.widget_font = arcadeFont40
+        mainTheme.title_font = self.arcadeFont40
+        mainTheme.widget_font = self.arcadeFont40
 
         # LOGIN MENU
         self.loginMenu = pygame_menu.Menu(title="Login", width=1600, height=900, theme=mainTheme)
@@ -156,21 +170,24 @@ class Launcher:
                 title='Choose a game ',
                 items=self.__getAvailablesGames(mode='solo'),
                 default=0,
-                # onchange = self.__updateSoloScoreboard,
+                onchange = self.__updateSoloScoreboard,
                 onreturn=self.__launchSoloGame,
             )
 
             self.soloScoreboard = self.soloGamesListMenu.add.table()
             self.soloScoreboard.translate(0, 40)
             self.soloScoreboard.default_cell_padding = 20
-            self.soloScoreboard.add_row(['#RANK', 'Epitech login', "SCORE"], cell_font=arcadeFont20, cell_font_color='white')
+            self.soloScoreboard.add_row(['#RANK', 'Epitech login', "SCORE"], cell_font=self.arcadeFont20, cell_font_color='white')
             scoreboard = soloGameSelector.get_value()[0][1].scoreboards['SOLO']
-            for i in range(len(scoreboard)):
-                topColors = ['gold', 'slategray3', 'darkorange3']
-                self.soloScoreboard.add_row([f'#{i + 1}', scoreboard[i]['username'], scoreboard[i]['score']], cell_font=arcadeFont20,
-                                            cell_font_color=topColors[i] if i < 3 else 'white')
+            if scoreboard:
+              for i in range(len(scoreboard)):
+                  topColors = ['gold', 'slategray3', 'darkorange3']
+                  self.soloScoreboard.add_row([f'#{i + 1}', scoreboard[i]['username'], scoreboard[i]['score']], cell_font=self.arcadeFont20,
+                                              cell_font_color=topColors[i] if i < 3 else 'white')
+            else:
+              self.soloScoreboard.add_row(['---', "---", "---"], cell_font=self.arcadeFont20, cell_font_color='white')
             self.soloScoreboard.update_cell_style(-1, -1, border_position=pygame_menu.locals.POSITION_NORTH)
-            self.soloScoreboard.update_cell_style(-1, 1, font=arcadeFont40, border_width=0)
+            self.soloScoreboard.update_cell_style(-1, 1, font=self.arcadeFont40, border_width=0)
         else:
             self.soloGamesListMenu.add.label("No games found", max_char=-1)
             self.soloGamesListMenu.add.label("Student login: None", 'login_message')
@@ -190,14 +207,17 @@ class Launcher:
             self.duoScoreboard = self.duoGamesListMenu.add.table()
             self.duoScoreboard.translate(0, 40)
             self.duoScoreboard.default_cell_padding = 20
-            self.duoScoreboard.add_row(['#RANK', 'Epitech login', 'SCORE'], cell_font=arcadeFont20, cell_font_color='white')
+            self.duoScoreboard.add_row(['#RANK', 'Epitech login', 'SCORE'], cell_font=self.arcadeFont20, cell_font_color='white')
             scoreboard = duoGameSelector.get_value()[0][1].scoreboards['DUO']
-            for i in range(len(scoreboard)):
-                topColors = ['gold', 'slategray3', 'darkorange3']
-                self.duoScoreboard.add_row([f'#{i + 1}', scoreboard[i]['username'], scoreboard[i]['score']], cell_font=arcadeFont20,
-                                           cell_font_color=topColors[i] if i < 3 else 'white')
+            if scoreboard:
+              for i in range(len(scoreboard)):
+                  topColors = ['gold', 'slategray3', 'darkorange3']
+                  self.duoScoreboard.add_row([f'#{i + 1}', scoreboard[i]['username'], scoreboard[i]['score']], cell_font=self.arcadeFont20,
+                                              cell_font_color=topColors[i] if i < 3 else 'white')
+            else:
+              self.duoScoreboard.add_row(['---', "---", "---"], cell_font=self.arcadeFont20, cell_font_color='white')
             self.duoScoreboard.update_cell_style(-1, -1, border_position=pygame_menu.locals.POSITION_NORTH)
-            self.duoScoreboard.update_cell_style(-1, 1, font=arcadeFont40, border_width=0)
+            self.duoScoreboard.update_cell_style(-1, 1, font=self.arcadeFont40, border_width=0)
         else:
             self.duoGamesListMenu.add.label("No games found", max_char=-1)
 
