@@ -79,6 +79,8 @@ class Launcher:
             self.soloGamesListMenu.update(events)
         elif self.view == View.DUO_GAMES_LIST_MENU:
             self.duoGamesListMenu.update(events)
+        elif self.view == View.IN_GAME_MENU:
+            self.inGameMenu.update(events)
 
         for event in events:
             if event.type == pygame.KEYDOWN:
@@ -98,6 +100,8 @@ class Launcher:
             self.soloGamesListMenu.draw(screen)
         elif self.view == View.DUO_GAMES_LIST_MENU:
             self.duoGamesListMenu.draw(screen)
+        elif self.view == View.IN_GAME_MENU:
+            self.inGameMenu.draw(screen)
 
         pygame.display.flip()
 
@@ -220,6 +224,11 @@ class Launcher:
             self.duoScoreboard.update_cell_style(-1, 1, font=self.arcadeFont40, border_width=0)
         else:
             self.duoGamesListMenu.add.label("No games found", max_char=-1)
+        
+        #IN GAME MENU
+        self.inGameMenu = pygame_menu.Menu(title="", width=1600, height=900, theme=mainTheme)
+        self.inGameMenu.add.label("Game is still running", max_char=-1)
+
 
     def __loadAvailableGames(self):
         mainFolder = './games'
