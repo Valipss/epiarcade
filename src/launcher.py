@@ -8,6 +8,7 @@ from typing import Any
 # Import non-standard modules
 import pygame
 import pygame_menu  # https://pygame-menu.readthedocs.io/en/4.2.4/index.html
+import pygame_menu.controls as ctrl
 from pygame.locals import *
 
 from src import jadoor
@@ -15,7 +16,6 @@ from src.jadoor.credit import Credit
 # Import class
 from src.misc import Misc
 
-pygame.joystick.init();
 
 class View(Enum):
     LOGIN_MENU = 1
@@ -55,6 +55,7 @@ class Game():
 
 class Launcher:
 
+
     def __init__(self):
         self.view = View.LOGIN_MENU
         self.connectedUsers = [None]
@@ -70,8 +71,15 @@ class Launcher:
         elif event.unicode == 'd':
             self.view = View.DUO_GAMES_LIST_MENU
 
+    def __handlejoystick(self, event):
+        if event.button == 8:
+            self.view = View.SOLO_GAMES_LIST_MENU
+        if event.button == 9:
+            self.view = View.DUO_GAMES_LIST_MENU
+
     def __update(self, dt):
         events = pygame.event.get()
+        ctrl.KEY_APPLY = pygame.K_SPACE
 
         currentView = self.view
         if self.view == View.LOGIN_MENU:
@@ -84,7 +92,9 @@ class Launcher:
             self.inGameMenu.update(events)
 
         for event in events:
-            if event.type == pygame.KEYDOWN:
+            if event.type == pygame.JOYBUTTONDOWN:
+                self.__handlejoystick(event)
+            elif event.type == pygame.KEYDOWN:
                 self.__handleKeydown(event)
             elif event.type == QUIT:  # TODO Remove for deployment, we don't want users leaving the launcher
                 pygame.quit()
@@ -240,6 +250,7 @@ class Launcher:
 
     def runPyGame(self):
         pygame.init()
+        pygame.joystick.init()
 
         fps = 60
         fpsClock = pygame.time.Clock()
@@ -252,6 +263,15 @@ class Launcher:
         dt = 1 / fps
         student_login = None
         while True:
+
+            # Get count of joysticks
+            joystick_count = pygame.joystick.get_count()
+
+            # For each joystick:
+            for i in range(joystick_count):
+                joystick = pygame.joystick.Joystick(i)
+                joystick.init()
+                
             self.__update(dt)
             self.__draw(screen)
             if self.view == View.LOGIN_MENU:

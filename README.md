@@ -14,3 +14,7 @@
 3. Add your executable file to the new directory.
 
 4. Your game is now deployed, Enjoy!
+
+
+sudo modprobe -r pn533_usb
+python3 -m nfc -vvv
