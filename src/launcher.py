@@ -15,6 +15,7 @@ from src.jadoor.credit import Credit
 # Import class
 from src.misc import Misc
 
+pygame.joystick.init();
 
 class View(Enum):
     LOGIN_MENU = 1
