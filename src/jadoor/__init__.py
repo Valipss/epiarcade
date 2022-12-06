@@ -31,7 +31,7 @@ class JaDoor:
         print('ID: ' + id_str)
         print('Product: ' + tag.product)
 
-        if tag.product not in {'NXP NTAG203', 'NXP NTAG213', 'Type4Tag'}:
+        if tag.product not in {'NXP NTAG203', 'NXP NTAG213', 'NXP NTAG215', 'Type4Tag'}:
             print('Invalid tag type')
             reader.beep(self.clf, 3)
             time.sleep(5)

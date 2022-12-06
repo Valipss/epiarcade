@@ -9,7 +9,18 @@ from typing import Any
 import pygame
 import pygame_menu  # https://pygame-menu.readthedocs.io/en/4.2.4/index.html
 import pygame_menu.controls as ctrl
+from pygame_menu.controls import Controller
 from pygame.locals import *
+
+pygame.init()
+
+# Initialize controller
+joysticks = []
+for i in range(pygame.joystick.get_count()):
+    joysticks.append(pygame.joystick.Joystick(i))
+for joystick in joysticks:
+    joystick.init()
+analog_keys = {0: 0, 1: 0, 2: 0, 3: 0, 4: -1, 5: -1}
 
 from src import jadoor
 from src.jadoor.credit import Credit
@@ -50,6 +61,7 @@ class Game():
             capture_output=True,
             cwd="games/" + self.name + "/"
         )
+        print(process)
         launcher.view = View.LOGIN_MENU
 
 
@@ -77,9 +89,15 @@ class Launcher:
         if event.button == 9:
             self.view = View.DUO_GAMES_LIST_MENU
 
+    def custom_widget_apply(event, widget) -> bool: 
+        return event.key == pygame.K_SPACE or event.button == 10
     def __update(self, dt):
         events = pygame.event.get()
-        ctrl.KEY_APPLY = pygame.K_SPACE
+        new_ctrl = Controller()
+        new_ctrl.apply = self.custom_widget_apply
+        new_ctrl.joy_delay = 200 # ms
+        self.soloGamesListMenu.set_controller(new_ctrl)
+
 
         currentView = self.view
         if self.view == View.LOGIN_MENU:
@@ -96,9 +114,6 @@ class Launcher:
                 self.__handlejoystick(event)
             elif event.type == pygame.KEYDOWN:
                 self.__handleKeydown(event)
-            elif event.type == QUIT:  # TODO Remove for deployment, we don't want users leaving the launcher
-                pygame.quit()
-                sys.exit()
 
     def __draw(self, screen):
         screen.fill((0, 0, 0))
@@ -249,12 +264,9 @@ class Launcher:
             self.availableGames[gameName] = Game(name=gameName, config=config)
 
     def runPyGame(self):
-        pygame.init()
-        pygame.joystick.init()
-
         fps = 60
         fpsClock = pygame.time.Clock()
-        screen = pygame.display.set_mode((0, 0), pygame.RESIZABLE)
+        screen = pygame.display.set_mode((0, 0), pygame.FULLSCREEN)
 
         self.__loadAvailableGames()
         self.__initComponents()
@@ -263,15 +275,6 @@ class Launcher:
         dt = 1 / fps
         student_login = None
         while True:
-
-            # Get count of joysticks
-            joystick_count = pygame.joystick.get_count()
-
-            # For each joystick:
-            for i in range(joystick_count):
-                joystick = pygame.joystick.Joystick(i)
-                joystick.init()
-                
             self.__update(dt)
             self.__draw(screen)
             if self.view == View.LOGIN_MENU:
