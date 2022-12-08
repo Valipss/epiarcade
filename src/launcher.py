@@ -9,7 +9,6 @@ from typing import Any
 import pygame
 import pygame_menu  # https://pygame-menu.readthedocs.io/en/4.2.4/index.html
 import pygame_menu.controls as ctrl
-from pygame_menu.controls import Controller
 from pygame.locals import *
 
 pygame.init()
@@ -89,15 +88,8 @@ class Launcher:
         if event.button == 9:
             self.view = View.DUO_GAMES_LIST_MENU
 
-    def custom_widget_apply(event, widget) -> bool: 
-        return event.key == pygame.K_SPACE or event.button == 10
     def __update(self, dt):
         events = pygame.event.get()
-        new_ctrl = Controller()
-        new_ctrl.apply = self.custom_widget_apply
-        new_ctrl.joy_delay = 200 # ms
-        self.soloGamesListMenu.set_controller(new_ctrl)
-
 
         currentView = self.view
         if self.view == View.LOGIN_MENU:
@@ -196,6 +188,17 @@ class Launcher:
             self.soloGamesListMenu.add.label("Student login: None", 'login_message')
             self.soloGamesListMenu.add.label("Credit state unknown", 'credit_message')
             self.soloGamesListMenu.add.label("Logout in ? seconds", 'logout_timer')
+
+            def custom_joy_apply(event, _) -> bool:
+                """
+                Custom widget apply event.
+                """
+                condition = event.button == 10
+                return condition
+
+            new_ctrl_sel = ctrl.Controller()
+            # new_ctrl_sel.joy_delay = 200 # ms
+            new_ctrl_sel.joy_select = custom_joy_apply
             soloGameSelector = self.soloGamesListMenu.add.selector(
                 title='Choose a game ',
                 items=self.__getAvailablesGames(mode='solo'),
@@ -203,6 +206,7 @@ class Launcher:
                 onchange=self.__updateSoloScoreboard,
                 onreturn=self.__launchSoloGame,
             )
+            soloGameSelector.set_controller(new_ctrl_sel)
 
             self.soloScoreboard = self.soloGamesListMenu.add.table()
             self.soloScoreboard.translate(0, 40)
@@ -267,6 +271,7 @@ class Launcher:
         fps = 60
         fpsClock = pygame.time.Clock()
         screen = pygame.display.set_mode((0, 0), pygame.FULLSCREEN)
+        pygame.mouse.set_cursor((8,8),(0,0),(0,0,0,0,0,0,0,0),(0,0,0,0,0,0,0,0))
 
         self.__loadAvailableGames()
         self.__initComponents()
