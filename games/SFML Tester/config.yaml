@@ -1,6 +1,0 @@
-EXECUTABLE_PATH: "a.out" # EXAMPLE : 'pacman' or 'bin/pacman'
-LANGUAGE: "C++" # C, C++, python, C# ...
-DEPENDENCIES_SCRIPT: [] # Script to install any particular
-INPUTS: [] # Remapping joysticks and button inputs.
-VERSION: "1.0" # Version of your game
-GAMEMODES: ["solo"] # ["solo"] or ["duo"] or ["solo", "duo"]
